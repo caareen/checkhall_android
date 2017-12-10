@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "243043320845",
+    "firebase_url": "https://checkhall-98009.firebaseio.com",
+    "project_id": "checkhall-98009",
+    "storage_bucket": "checkhall-98009.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:243043320845:android:a36a0425ac1fd92c",
+        "android_client_info": {
+          "package_name": "com.checkhall"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "243043320845-3aq9ih5s6bpnlr3h1cnqdgl6v3ctmv0n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCp8Hawrcov2n4uaFS53OJIMflqhUgIqUw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
