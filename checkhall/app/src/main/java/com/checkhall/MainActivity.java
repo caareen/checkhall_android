@@ -18,6 +18,7 @@ import android.webkit.ConsoleMessage;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebBackForwardList;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -177,6 +178,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Log.d("LCheckhall","MainActivity/onCreate()");
+
         webview = (WebView) findViewById(R.id.webview);
         initWebView();
     }
@@ -216,8 +219,8 @@ public class MainActivity extends AppCompatActivity {
             //noinspection deprecation
             CookieSyncManager.createInstance(this);
         }
-        webview.setWebViewClient(new WishWebViewClient ());
-        webview.setWebChromeClient(new WishWebChromeClient());
+        webview.setWebViewClient( new WishWebViewClient() );
+        webview.setWebChromeClient( new WishWebChromeClient() );
         WebSettings webSettings = webview.getSettings();
         webSettings.setAppCacheEnabled(false);
         webSettings.setJavaScriptEnabled(true);
@@ -228,7 +231,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean isLastPag(){
+        WebBackForwardList list = webview.copyBackForwardList();
         Log.d(TAG, "isLastPag url=" + webview.getUrl());
+        Log.d(TAG, "isLastPag webview.canGoBack=" + webview.canGoBack() + ", history.size=" + list.getSize() + ", history.curindex="+list.getCurrentIndex());
         if( webview.getUrl().endsWith("/plan/")
                 || webview.getUrl().endsWith("/hall/")
                 || webview.getUrl().endsWith("/hall/index.jsp")
@@ -359,8 +364,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url){
             Log.d(TAG,"shouldOverrideUrlLoading url="+url);
-            view.loadUrl(url);
-            return true;
+//            view.loadUrl(url);
+            return false;
         }
 
         @Override
