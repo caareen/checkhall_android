@@ -27,6 +27,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.checkhall.util.AlertUtil;
+import com.checkhall.util.BadgeCountUtil;
 import com.checkhall.util.DeviceUtil;
 import com.kakao.kakaolink.KakaoLink;
 import com.kakao.kakaolink.KakaoTalkLinkMessageBuilder;
@@ -206,6 +207,7 @@ public class MainActivity extends AppCompatActivity {
         String url = null;
         Bundle extras = getIntent().getExtras();
         if(extras != null){
+            Log.d("LCheckhall","MainActivity/getActionUrl() extras="+extras);
             url = extras.get("action_url").toString();
         } else {
             url = "http://www.checkhall.com/member/login.jsp";

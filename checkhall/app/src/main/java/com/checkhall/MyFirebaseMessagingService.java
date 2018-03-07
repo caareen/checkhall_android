@@ -4,14 +4,20 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
+import com.checkhall.util.BadgeCountUtil;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+
+import java.util.List;
 
 /**
  * Created by machorom on 2017-09-05.
@@ -28,9 +34,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         // message, here is where that should be initiated.
         Log.d(TAG, "From: " + remoteMessage.getFrom() + ", RID=" + REQUERS_ID);
         Log.d(TAG, "data.action_url: " + remoteMessage.getData().get("action_url"));
+        Log.d(TAG, "data.badge_count: " + remoteMessage.getData().get("badge_count"));
         Log.d(TAG, "Notification Message Body: " + remoteMessage.getNotification().getBody());
         Log.d(TAG, "Notification Message ClickAction: " + remoteMessage.getNotification().getClickAction());
         Log.d(TAG, "Notification Message notification: " + remoteMessage.getNotification().toString());
+
+        BadgeCountUtil.setAppBadgeCount(this, remoteMessage.getData().get("badge_count"));
 
         //Uri sound= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         String uri = "android.resource://com.checkhall/" + R.raw.checkhall;
@@ -55,5 +64,17 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationManager.notify(REQUERS_ID, mBuilder.build());
         REQUERS_ID++;
+    }
+
+    @Override
+    public void handleIntent(Intent intent) {
+        Log.d(TAG, "handleIntent intent= " + intent);
+        Bundle extras = intent.getExtras();
+        if(extras != null){
+            Log.d("LCheckhall","handleIntent badge_count="+extras.getString("badge_count"));
+            Log.d("LCheckhall","handleIntent action_url="+extras.getString("action_url"));
+            BadgeCountUtil.setAppBadgeCount(this, extras.getString("badge_count"));
+        }
+        super.handleIntent(intent);
     }
 }
