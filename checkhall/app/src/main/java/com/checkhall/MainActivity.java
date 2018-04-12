@@ -27,6 +27,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.checkhall.util.AlertUtil;
+import com.checkhall.util.BadgeCountUtil;
 import com.checkhall.util.DeviceUtil;
 import com.kakao.kakaolink.KakaoLink;
 import com.kakao.kakaolink.KakaoTalkLinkMessageBuilder;
@@ -206,6 +207,7 @@ public class MainActivity extends AppCompatActivity {
         String url = null;
         Bundle extras = getIntent().getExtras();
         if(extras != null){
+            Log.d("LCheckhall","MainActivity/getActionUrl() extras="+extras);
             url = extras.get("action_url").toString();
         } else {
             url = "http://www.checkhall.com/member/login.jsp";
@@ -289,45 +291,64 @@ public class MainActivity extends AppCompatActivity {
 
     private class WishWebChromeClient extends WebChromeClient{
 
+        private void setPushToken(String message){
+            try {
+                JSONObject jobj = new JSONObject(message);
+                AsyncTask.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        URL url = null;
+                        try {
+                            url = new URL("http://m.checkhall.com/member/setPushToken.jsp");
+                            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                            connection.setRequestMethod("POST");
+                            String data = "idx="+DeviceUtil.getUserIdx(MainActivity.this)+"&device_id="+ DeviceUtil.getDeviceUUID(MainActivity.this)+"&push_type=fcm&push_token="+DeviceUtil.getPushTokenId(MainActivity.this);
+                            Log.d(TAG,"TokenId register param - " + data);
+                            connection.setDoOutput(true);
+                            connection.getOutputStream().write(data.getBytes());
+                            if (connection.getResponseCode() == 200) {
+                                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+                                DeviceUtil.setLogined(MainActivity.this);
+                                Log.d(TAG,"TokenId register Success - " + connection.getResponseCode() + "," + reader.readLine());
+                            } else {
+                                Log.d(TAG,"TokenId register fail - " + connection.getResponseCode() + ", "+ connection.getResponseMessage());
+                            }
+                        } catch (MalformedURLException e) {
+                            e.printStackTrace();
+                            Log.e(TAG,e.getMessage());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            Log.e(TAG,e.getMessage());
+                        }
+                    }
+                });
+                Log.d(TAG, "server.idx = " + jobj.getString("idx"));
+                DeviceUtil.setUserIdx(MainActivity.this, jobj.getString("idx"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Log.d(TAG, "onConsoleMessage->setPushToken JSONException " + e.getMessage());
+            }
+        }
+
+        private void setBadgeCount(String message){
+            try {
+                JSONObject jobj = new JSONObject(message);
+                Log.d(TAG, "badge.count = " + jobj.getString("badge_count"));
+                BadgeCountUtil.setAppBadgeCount(MainActivity.this, jobj.getString("badge_count"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Log.d(TAG, "onConsoleMessage->setBadgeCount JSONException " + e.getMessage());
+            }
+        }
+
+
         public boolean onConsoleMessage(ConsoleMessage cm) {
             if(cm.message().contains("{\"idx\":")){
-                try {
-                    JSONObject jobj = new JSONObject(cm.message());
-                    AsyncTask.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            URL url = null;
-                            try {
-                                url = new URL("http://m.checkhall.com/member/setPushToken.jsp");
-                                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                                connection.setRequestMethod("POST");
-                                String data = "idx="+DeviceUtil.getUserIdx(MainActivity.this)+"&device_id="+ DeviceUtil.getDeviceUUID(MainActivity.this)+"&push_type=fcm&push_token="+DeviceUtil.getPushTokenId(MainActivity.this);
-                                Log.d(TAG,"TokenId register param - " + data);
-                                connection.setDoOutput(true);
-                                connection.getOutputStream().write(data.getBytes());
-                                if (connection.getResponseCode() == 200) {
-                                    BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
-                                    DeviceUtil.setLogined(MainActivity.this);
-                                    Log.d(TAG,"TokenId register Success - " + connection.getResponseCode() + "," + reader.readLine());
-                                } else {
-                                    Log.d(TAG,"TokenId register fail - " + connection.getResponseCode() + ", "+ connection.getResponseMessage());
-                                }
-                            } catch (MalformedURLException e) {
-                                e.printStackTrace();
-                                Log.e(TAG,e.getMessage());
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                                Log.e(TAG,e.getMessage());
-                            }
-                        }
-                    });
-                    Log.d(TAG, "server.idx = " + jobj.getString("idx"));
-                    DeviceUtil.setUserIdx(MainActivity.this, jobj.getString("idx"));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    Log.d(TAG, "onConsoleMessage JSONException " + e.getMessage());
-                }
+                setPushToken(cm.message());
+            } else if( cm.message().contains("{\"badge_count\":") ){
+                setBadgeCount(cm.message());
             }
+
             Log.d(TAG, cm.message() + " -- From line "
                     + cm.lineNumber() + " of "
                     + cm.sourceId() );
